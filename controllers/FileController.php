@@ -61,16 +61,9 @@ class FileController extends ActiveController
                 break;
             case 'moderator':
 //                Moderator can see only his files among 'moderators' and all 'user's files
-                    $query = Files::findBySql("
-                    SELECT files.id, files.hash_sum, files.filename, files.extension, files.user_id, files.file_location, aa.item_name 
-                    FROM file_tasks.files 
-                    left join auth_assignment aa on aa.user_id = files.user_id
-                    Where aa.item_name = 'user' 
-                    UNION
-                    SELECT files.id, files.hash_sum, files.filename, files.extension, files.user_id, files.file_location, aa.item_name 
-                    FROM file_tasks.files 
-                    left join auth_assignment aa on aa.user_id = files.user_id
-                    Where aa.item_name = 'moderator' and files.user_id = ".$this->user->id);
+                $query->leftJoin('auth_assignment', '`auth_assignment`.`user_id` = `files`.`user_id`')
+                ->andWhere(['auth_assignment.item_name' => 'user'])
+                ->andWhere(['files.user_id' => $this->user->id]);
                 break;
             default:
                 break;
