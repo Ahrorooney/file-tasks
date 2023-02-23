@@ -81,7 +81,7 @@ class Files extends \yii\db\ActiveRecord
 //            if file exists, just save the record not file
             $this->file_location = $file->file_location;
         } else {
-            $file_path = 'uploads/'.$this->filename. '-' .$this->user_id .'.'. $this->upload_file->extension;
+            $file_path = 'uploads/'.$this->filename. '-' .$this->hash_sum .'.'. $this->upload_file->extension;
             if (!is_dir(dirname($file_path))){
                 FileHelper::createDirectory(dirname($file_path));
             }
