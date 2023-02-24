@@ -5,6 +5,7 @@ namespace app\models;
 use Yii;
 use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
+use yii\web\NotFoundHttpException;
 
 /**
  * User model
@@ -14,6 +15,7 @@ use yii\web\IdentityInterface;
  * @property string $password
  * @property string $authKey
  * @property string $accessToken // todo make this field will be changed each time user login
+ * @property mixed $token_expire_datetime
  *
  */
 class User extends ActiveRecord implements IdentityInterface
@@ -73,6 +75,11 @@ class User extends ActiveRecord implements IdentityInterface
         return $this->id;
     }
 
+    public function getTokenExpireDatetime()
+    {
+        return $this->token_expire_datetime;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -103,5 +110,17 @@ class User extends ActiveRecord implements IdentityInterface
     public function generateAccessToken()
     {
         $this->accessToken = Yii::$app->security->generateRandomString();
+        $this->token_expire_datetime = date("Y-m-d H:i:s", strtotime("+1 hours"));
+
+    }
+    public function checkExpirationOfToken()
+    {
+        $expire_date = Yii::$app->user->getIdentity()->getTokenExpireDatetime();
+        $now = date("Y-m-d H:i:s");
+        if ($now > $expire_date) {
+            throw new NotFoundHttpException("Access Token is expired! Please re-login to get new Access Token.");
+        } else {
+            return True;
+        }
     }
 }

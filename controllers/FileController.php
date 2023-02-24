@@ -10,6 +10,7 @@ use yii\data\ActiveDataProvider;
 use yii\filters\auth\HttpBearerAuth;
 use yii\rest\ActiveController;
 use yii\web\MethodNotAllowedHttpException;
+use yii\web\NotAcceptableHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\UploadedFile;
 
@@ -18,6 +19,10 @@ class FileController extends ActiveController
     public $modelClass = 'app\resource\Files';
     public String $user_role;
 
+    /**
+     * @throws \Throwable
+     * @throws NotFoundHttpException
+     */
     public function behaviors()
     {
         $behaviors = parent::behaviors();
@@ -25,6 +30,7 @@ class FileController extends ActiveController
         $behaviors['authenticator']['authMethods'] = [
             HttpBearerAuth::class
         ];
+        Yii::$app->user->getIdentity()->checkExpirationOfToken();
         $this->user_role = array_values(\Yii::$app->authManager->getRolesByUser(Yii::$app->user->id))[0]->name;
 
         return $behaviors;
@@ -70,7 +76,6 @@ class FileController extends ActiveController
             $model = new Files();
             $model->upload_file = $file;
             $model->user_id = Yii::$app->user->id;
-//            var_dump($file); die;
             if (!$model->save()) {
                 return $model;
             }
